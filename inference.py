@@ -1,12 +1,12 @@
 import asyncio
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from openai import AsyncOpenAI
 from typing import List, Dict, Any, Optional
 
-from customer_agency_env.client import CustomerAgencyEnv
-from customer_agency_env.models import Action
+from client import CustomerAgencyEnv
+from models import Action
 
 # --- Constants ---
 MAX_STEPS = 10
@@ -17,7 +17,7 @@ SUCCESS_SCORE_THRESHOLD = 0.8
 def log_start(task_id: str, task_category: str, task_difficulty: str):
     print(json.dumps({
         "event": "start",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "task_id": task_id,
         "task_category": task_category,
         "task_difficulty": task_difficulty,
@@ -26,7 +26,7 @@ def log_start(task_id: str, task_category: str, task_difficulty: str):
 def log_step(step: int, action: Dict[str, Any], reward: float, done: bool, error: Optional[str]):
     print(json.dumps({
         "event": "step",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "step": step,
         "action": action,
         "reward": reward,
@@ -37,7 +37,7 @@ def log_step(step: int, action: Dict[str, Any], reward: float, done: bool, error
 def log_end(success: bool, steps: int, score: float, rewards: List[float]):
     print(json.dumps({
         "event": "end",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "success": success,
         "steps": steps,
         "score": score,

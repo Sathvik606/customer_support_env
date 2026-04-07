@@ -1,7 +1,32 @@
-spec_version: 1
-name: customer_agency_env
-type: space
-runtime: fastapi
-app: server.app:app
-port: 8000
+# openenv.yaml
+api_version: 1.0.0
+name: customer-agency-env
+version: 0.1.0
+description: A simulation environment for an AI customer support agent.
+author: "GitHub Copilot"
+license: "MIT"
+
+# Information about the environment's action and observation spaces
+action_space: "models.Action"
+observation_space: "models.Observation"
+
+# Entrypoint for the environment server
+entrypoint:
+  type: "http"
+  module: "server.app"
+  class: "CustomerSupportEnv"
+
+# Docker build context and image name
+build:
+  image_name: "customer-agency-env"
+  dockerfile: "server/Dockerfile"
+  context: "."
+
+# Tags for Hugging Face Spaces
+tags:
+  - "openenv"
+  - "rl"
+  - "customer-support"
+  - "agent"
+
 

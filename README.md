@@ -1,103 +1,114 @@
----
-title: Customer Agency Env Environment Server
-emoji: 💻
-colorFrom: red
-colorTo: pink
-sdk: docker
-pinned: false
-app_port: 8000
-base_path: /web
-tags:
-  - openenv
----
+# Customer Support Agent Environment
 
-# Customer Agency Env Environment
+This project is an OpenEnv-compliant reinforcement learning environment that simulates a real-world customer support scenario. An AI agent learns to handle customer queries by following company policies to resolve issues related to refunds, replacements, deliveries, and payments.
 
-A simple test environment that echoes back messages. Perfect for testing the env APIs as well as demonstrating environment usage patterns.
+## Environment Description and Motivation
 
-## Quick Start
+The goal of this environment is to train and evaluate AI agents on their ability to perform policy-based issue resolution in a customer support context. This is a critical task for many businesses, and automating it with AI can lead to significant efficiency gains and improved customer satisfaction. This environment provides a realistic and challenging testbed for developing such agents.
 
-The simplest way to use the Customer Agency Env environment is through the `CustomerAgencyEnv` class:
+## Action and Observation Spaces
 
-```python
-from customer_agency_env import CustomerAgencyAction, CustomerAgencyEnv
+### Action Space
 
-try:
-    # Create environment from Docker image
-    customer_agency_envenv = CustomerAgencyEnv.from_docker_image("customer_agency_env-env:latest")
+The agent's action is defined by the `Action` model in `models.py`:
 
-    # Reset
-    result = customer_agency_envenv.reset()
-    print(f"Reset: {result.observation.echoed_message}")
+-   `resolution` (str): The resolution action to take (e.g., 'approve', 'deny', 'escalate').
+-   `message` (str): The message to send to the customer.
 
-    # Send multiple messages
-    messages = ["Hello, World!", "Testing echo", "Final message"]
+### Observation Space
 
-    for msg in messages:
-        result = customer_agency_envenv.step(CustomerAgencyAction(message=msg))
-        print(f"Sent: '{msg}'")
-        print(f"  → Echoed: '{result.observation.echoed_message}'")
-        print(f"  → Length: {result.observation.message_length}")
-        print(f"  → Reward: {result.reward}")
+The agent receives an observation defined by the `Observation` model in `models.py`:
 
-finally:
-    # Always clean up
-    customer_agency_envenv.close()
-```
+-   `customer_query` (str): The customer's query.
+-   `policy` (Dict[str, Any]): The applicable company policy.
+-   `context` (Dict[str, Any]): Additional context for the query.
+-   `history` (List[str]): The history of interactions in the current episode.
+-   `echoed_message` (Optional[str]): The last message sent by the agent.
 
-That's it! The `CustomerAgencyEnv.from_docker_image()` method handles:
-- Starting the Docker container
-- Waiting for the server to be ready
-- Connecting to the environment
-- Container cleanup when you call `close()`
+## Task Descriptions
 
-## Building the Docker Image
+The environment includes tasks of varying difficulty across four categories:
 
-Before using the environment, you need to build the Docker image:
+### 1. Refund Resolution
+-   **Easy**: A straightforward refund request within the policy limits.
+-   **Medium**: A request that is outside the standard refund window but may qualify for a different resolution (e.g., replacement).
+-   **Hard**: A request for a non-refundable item, requiring the agent to deny the refund while potentially offering an alternative solution.
 
-```bash
-# From project root
-docker build -t customer_agency_env-env:latest -f server/Dockerfile .
-```
+### 2. Replacement Handling
+-   Tasks will involve deciding whether a product qualifies for replacement based on policy rules.
 
-## Deploying to Hugging Face Spaces
+### 3. Delivery Information Support
+-   Tasks will involve handling delivery-related queries, including delays and tracking issues.
 
-You can easily deploy your OpenEnv environment to Hugging Face Spaces using the `openenv push` command:
+### 4. Payment Issue Resolution
+-   Tasks will involve addressing payment-related concerns such as duplicate charges or failed transactions.
 
-```bash
-# From the environment directory (where openenv.yaml is located)
-openenv push
+## Setup and Usage
 
-# Or specify options
-openenv push --namespace my-org --private
-```
+### Local Setup
 
-The `openenv push` command will:
-1. Validate that the directory is an OpenEnv environment (checks for `openenv.yaml`)
-2. Prepare a custom build for Hugging Face Docker space (enables web interface)
-3. Upload to Hugging Face (ensuring you're logged in)
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Sathvik606/customer_support_env.git
+    cd customer_support_env
+    ```
 
-### Prerequisites
+2.  **Install dependencies:**
+    ```bash
+    pip install -r server/requirements.txt
+    ```
 
-- Authenticate with Hugging Face: The command will prompt for login if not already authenticated
+3.  **Run the environment server:**
+    ```bash
+    uvicorn server.app:app --host 0.0.0.0 --port 8000
+    ```
 
-### Options
+### Docker
 
-- `--directory`, `-d`: Directory containing the OpenEnv environment (defaults to current directory)
-- `--repo-id`, `-r`: Repository ID in format 'username/repo-name' (defaults to 'username/env-name' from openenv.yaml)
-- `--base-image`, `-b`: Base Docker image to use (overrides Dockerfile FROM)
-- `--private`: Deploy the space as private (default: public)
+1.  **Build the Docker image:**
+    ```bash
+    docker build -t customer-agency-env .
+    ```
 
-### Examples
+2.  **Run the Docker container:**
+    ```bash
+    docker run -p 8000:8000 customer-agency-env
+    ```
 
-```bash
-# Push to your personal namespace (defaults to username/env-name from openenv.yaml)
-openenv push
+## How to Run Inference
 
-# Push to a specific repository
-openenv push --repo-id my-org/my-env
+The `inference.py` script runs a baseline agent against the environment.
 
-# Push with a custom base image
+1.  **Set environment variables:**
+    ```bash
+    export API_BASE_URL="your_llm_api_endpoint"
+    export MODEL_NAME="your_model_name"
+    export HF_TOKEN="your_api_key"
+    ```
+
+2.  **Run the script:**
+    ```bash
+    python inference.py
+    ```
+
+## Baseline Scores
+
+The baseline scores will be populated here after running the inference script against a set of evaluation tasks.
+
+| Task ID         | Category | Difficulty | Score |
+|-----------------|----------|------------|-------|
+| refund_easy_1   | refund   | easy       | TBD   |
+| refund_medium_1 | refund   | medium     | TBD   |
+| refund_hard_1   | refund   | hard       | TBD   |
+
+## Deployment to Hugging Face Spaces
+
+This environment is designed to be deployed as a Hugging Face Space.
+
+1.  Create a new Space on Hugging Face, selecting the "Docker" template.
+2.  Link the Space to your GitHub repository.
+3.  The `Dockerfile` and `openenv.yaml` are configured for deployment. Hugging Face will automatically build and deploy the environment.
+
 openenv push --base-image ghcr.io/meta-pytorch/openenv-base:latest
 
 # Push as a private space
