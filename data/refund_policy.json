@@ -1,0 +1,65 @@
+[
+    {
+        "task_id": "refund_easy_1",
+        "category": "refund",
+        "difficulty": "easy",
+        "query": "I bought a t-shirt last week and it's too small. Can I get a refund?",
+        "policy": {
+            "name": "Standard Refund Policy",
+            "rules": [
+                "Refunds are allowed within 30 days of purchase.",
+                "Item must be in original condition with tags attached.",
+                "Customer must provide proof of purchase."
+            ]
+        },
+        "context": {
+            "purchase_date": "7 days ago",
+            "item_condition": "new with tags",
+            "has_receipt": true
+        },
+        "expected_resolution": "approve",
+        "grader_logic": "Resolution must be 'approve' and response must mention the 30-day policy."
+    },
+    {
+        "task_id": "refund_medium_1",
+        "category": "refund",
+        "difficulty": "medium",
+        "query": "I want to return a laptop I bought 45 days ago. It's not working properly.",
+        "policy": {
+            "name": "Electronics Refund Policy",
+            "rules": [
+                "Electronics can be returned within 15 days for a full refund.",
+                "After 15 days, only replacements for defective items are possible, no refunds.",
+                "The item must be in its original packaging."
+            ]
+        },
+        "context": {
+            "purchase_date": "45 days ago",
+            "item_condition": "defective",
+            "has_original_packaging": true
+        },
+        "expected_resolution": "deny_refund_offer_replacement",
+        "grader_logic": "Resolution must be 'deny' for refund but offer a replacement, referencing the 15-day rule."
+    },
+    {
+        "task_id": "refund_hard_1",
+        "category": "refund",
+        "difficulty": "hard",
+        "query": "My custom-made suit doesn't fit right. I paid extra for expedited tailoring. I need a full refund immediately.",
+        "policy": {
+            "name": "Custom & Final Sale Policy",
+            "rules": [
+                "Custom-made items are non-refundable.",
+                "Store credit may be offered on a case-by-case basis if there is a clear manufacturing defect.",
+                "Expedited service fees are non-refundable."
+            ]
+        },
+        "context": {
+            "purchase_date": "3 days ago",
+            "item_condition": "custom-made, no defect",
+            "has_receipt": true
+        },
+        "expected_resolution": "deny_refund_offer_credit",
+        "grader_logic": "Resolution must deny the refund, correctly state that custom items are non-refundable, and optionally offer store credit as a goodwill gesture."
+    }
+]
